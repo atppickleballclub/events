@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0b344b">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ATP Events">
+<title>ATP Events</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="ATP Pickleball Club events — interclubs, tournaments and results.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: app-launcher. Club header, one big yellow poster for the next event, then every other event as square tiles in a 2-column grid (3 on wider screens). */
+:root {
+  --court: #1a78a8;        /* water blue (darkened for text on white) */
+  --court-deep: #0b344b;   /* badge navy */
+  --ball: #d7db38;         /* ball lime */
+  --ball-ink: #0b344b;
+  --rim: #aec11d;          /* badge rim green */
+  --line: #ffffff; --bg: #eef3f4; --surface: #ffffff; --fg: #0b2433; --muted: #557080;
+  --rule: #d3e0e4;
+  --live: #d55a1a;         /* reed orange */
+  --display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --court: #4cb6e6; --court-deep: #0e3a53; --ball: #d7db38; --ball-ink: #0b344b; --rim: #aec11d; --line: #ffffff;
+    --bg: #071d2a; --surface: #0f2c3f; --fg: #e6f0f3; --muted: #93abb8; --rule: #1f4257;
+    --live: #f07a3a; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --court: #4cb6e6; --court-deep: #0e3a53; --ball: #d7db38; --ball-ink: #0b344b; --rim: #aec11d; --line: #ffffff;
+    --bg: #071d2a; --surface: #0f2c3f; --fg: #e6f0f3; --muted: #93abb8; --rule: #1f4257;
+    --live: #f07a3a; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 16px; line-height: 1.45; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 640px; margin: 0 auto; padding-block: 18px 32px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 16px; }
+
+/* Header */
+.top { display: flex; align-items: center; gap: 14px; padding-inline: 2px; }
+.logo { width: 64px; height: auto; flex: none; }
+.top .club { font-family: var(--display); font-weight: 800; font-size: 28px; line-height: 1; text-transform: uppercase; letter-spacing: .02em; }
+.top .club small { display: block; font-weight: 600; font-size: 13px; letter-spacing: .16em; color: var(--muted); margin-bottom: 2px; }
+
+/* Next-event poster */
+.hero { background: var(--ball); color: var(--ball-ink); border-radius: 22px; padding: 20px; display: grid; gap: 6px; text-decoration: none; position: relative; overflow: hidden; }
+.hero::before { content: ""; position: absolute; right: -44px; top: -44px; width: 180px; height: 180px; border-radius: 50%; border: 20px solid rgba(11, 52, 75, .07); }
+.hero .head { display: flex; align-items: center; justify-content: space-between; gap: 12px; position: relative; }
+.hero .eyebrow { font-family: var(--display); font-weight: 700; font-size: 13px; letter-spacing: .16em; text-transform: uppercase; position: relative; }
+.hero .eyebrow.live { color: var(--live); }
+.hero h2 { margin: 0; font-family: var(--display); font-weight: 800; font-size: clamp(34px, 9vw, 46px); line-height: .98; text-transform: uppercase; text-wrap: balance; position: relative; }
+.hero .vs { font-weight: 700; font-size: 17px; }
+.hero .when { font-size: 15px; }
+.hero .row { margin-top: 10px; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.hero .days { font-family: var(--display); line-height: .9; }
+.hero .days b { font-size: 68px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.hero .days span { display: block; font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-top: 2px; }
+.hero .open { background: var(--ball-ink); color: var(--ball); border-radius: 999px; padding: 12px 18px; font-family: var(--display); font-weight: 700; font-size: 17px; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+
+/* Tiles */
+.label { margin: 8px 2px 0; font-family: var(--display); font-weight: 700; font-size: 13px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (min-width: 560px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.tile { background: var(--surface); border: 1px solid var(--rule); border-radius: 18px; padding: 14px; aspect-ratio: 1 / 1; max-width: 100%; min-width: 0;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 6px; text-decoration: none; color: var(--fg); }
+.tile.dark { background: var(--court-deep); color: var(--line); border-color: transparent; }
+.tile h3 { margin: 0; font-family: var(--display); font-weight: 800; font-size: 22px; line-height: 1; text-transform: uppercase; overflow-wrap: anywhere; }
+.tile .s { font-size: 13px; opacity: .8; }
+.tile .res { font-family: var(--display); font-weight: 700; font-size: 16px; color: var(--ball); letter-spacing: .04em; text-transform: uppercase; }
+.tile .go { font-family: var(--display); font-weight: 700; font-size: 15px; letter-spacing: .06em; text-transform: uppercase; color: var(--court); }
+.tile.dark .go { color: var(--ball); }
+.tile .soon { font-size: 13px; color: var(--muted); font-style: italic; }
+.tile.more { border-style: dashed; background: transparent; color: var(--muted); justify-content: center; align-items: center; text-align: center; font-size: 14px; }
+/* Club logos ("ATP vs Dural") */
+.clubs { display: inline-flex; align-items: center; gap: 6px; flex: none; }
+.clubs .x { font-family: var(--display); font-weight: 700; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; opacity: .7; }
+.crest { width: 34px; height: 34px; object-fit: contain; display: block; }
+.crest.token { border-radius: 50%; display: block; padding: 5px; box-shadow: 0 0 0 2px var(--rim); }
+.crest.token img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.hero .crest.token { padding: 8px; box-shadow: 0 0 0 3px var(--ball-ink); }
+.crest.init { border-radius: 50%; background: var(--court-deep); color: var(--line); border: 2px solid var(--rim);
+  display: grid; place-items: center; font-family: var(--display); font-weight: 800; font-size: 13px; letter-spacing: .02em; }
+.hero .crest { width: 56px; height: 56px; }
+.hero .crest.init { font-size: 19px; border-width: 3px; }
+.tile .crest { width: 40px; height: 40px; }
+.tile .crest.init { font-size: 11px; }
+.tile .crest.init { background: var(--bg); color: var(--fg); }
+.tile.dark .crest.init { background: var(--court); color: var(--line); }
+.tile .top { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; flex-wrap: wrap; }
+.chip { align-self: flex-start; font-family: var(--display); font-weight: 700; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; border: 1px solid currentColor; }
+.chip.live { background: var(--live); border-color: var(--live); color: #fff; }
+
+a:focus-visible { outline: 3px solid var(--court); outline-offset: 3px; }
+.tile.dark:focus-visible, .hero:focus-visible { outline-color: var(--court); }
+
+/* Install tip */
+.install { background: var(--surface); border: 1px dashed var(--rule); border-radius: 14px; padding: 14px; display: grid; gap: 8px; font-size: 15px; }
+.install strong { font-family: var(--display); font-size: 17px; letter-spacing: .04em; text-transform: uppercase; }
+.install button { justify-self: start; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 0; background: var(--court-deep); color: var(--line); font: 700 16px var(--display); letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+.install button:focus-visible { outline: 3px solid var(--court); outline-offset: 2px; }
+footer { color: var(--muted); font-size: 13px; text-align: center; }
+footer a { color: var(--court); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; display: inline-block; padding-block: 8px; }
+@media (prefers-reduced-motion: no-preference) {
+  .hero, .tile { transition: transform .12s ease; }
+  .hero:active, a.tile:active { transform: scale(.98); }
+}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <img class="logo" src="icons/logo.png" alt="ATP Pickleball Club" width="470" height="512">
+    <div class="club"><small>ATP Pickleball Club</small>Events</div>
+      </header>
+  <main id="app"></main>
+  <div class="install" id="install" hidden></div>
+  <footer>ATP Pickleball Club · <a href="https://www.atppickleballclub.com.au">www.atppickleballclub.com.au</a></footer>
+</div>
+
+<script>
+/* ===== EDIT YOUR EVENTS HERE =====
+   name:   full name (shown on the big poster)
+   short:  shorter name for the square tiles (optional)
+   date:   "YYYY-MM-DD", or null if not set yet
+   url:    the event's own site (null = "Coming soon")
+   clubs:  logos to show, e.g. ["atp", "dural"] (see CLUBS below)
+   result: shown once the event is over                          */
+const EVENTS = [
+  {
+    name: "Defend the Kitchen: Interclub II",
+    short: "Defend the Kitchen",
+    sub: "ATP vs Port Stephens",
+    clubs: ["atp", "ps"],
+    date: "2027-01-31",
+    time: "8:30am – 12pm",
+    venue: "Jonas Bradley Park",
+    url: "https://atpvsps.atppickleballclub.com.au"
+  },
+  {
+    name: "Interclub I",
+    sub: "ATP vs Dural",
+    clubs: ["atp", "dural"],
+    date: "2026-11-21",
+    url: "https://interclub.atppickleballclub.com.au"
+  }
+];
+/* Club logos. Use a club's key in an event's  clubs: [...]  list.
+   logo: image file (null = show the initials in a badge instead)
+   bg:   colour of the round badge behind the logo (optional)       */
+const CLUBS = {
+  atp:   { name: "ATP Pickleball Club",           initials: "ATP", logo: "icons/logo.png" },
+  dural: { name: "The Centre Dural Pickleball Club", initials: "DPC", logo: "icons/dural.png", bg: "#ffffff" },
+  ps:    { name: "Port Stephens Pickleball Club", initials: "PS",  logo: "icons/ps.png",    bg: "#0b344b" }
+};
+/* ================================= */
+
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const today = new Date(); today.setHours(0,0,0,0);
+const parse = s => { if (!s) return null; const [y,m,d] = s.split("-").map(Number); return new Date(y, m-1, d); };
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const status = e => { const d = parse(e.date); if (e.done) return "results"; if (!d) return "tba"; if (+d === +today) return "live"; return d < today ? "results" : "upcoming"; };
+const daysTo = e => Math.round((parse(e.date) - today) / 86400000);
+const longDate = e => parse(e.date).toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "long", year: "numeric" });
+const shortDate = e => { const d = parse(e.date); return d ? `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}` : ""; };
+
+function crests(e) {
+  const list = (e.clubs || []).map(k => CLUBS[k]).filter(Boolean);
+  if (!list.length) return "";
+  const one = c => c.logo && c.bg
+    ? `<span class="crest token" style="background:${esc(c.bg)}"><img src="${esc(c.logo)}" alt="${esc(c.name)}"></span>`
+    : c.logo ? `<img class="crest" src="${esc(c.logo)}" alt="${esc(c.name)}">`
+    : `<span class="crest init" role="img" aria-label="${esc(c.name)}">${esc(c.initials)}</span>`;
+  return `<span class="clubs">${list.map(one).join('<span class="x" aria-hidden="true">vs</span>')}</span>`;
+}
+
+function hero(e) {
+  const s = status(e), n = daysTo(e);
+  const tag = e.url ? "a" : "div";
+  const href = e.url ? ` href="${esc(e.url)}"` : "";
+  return `<${tag} class="hero"${href}>
+    <span class="head"><span class="eyebrow${s === "live" ? " live" : ""}">${s === "live" ? "On today" : "Next up"}</span>${crests(e)}</span>
+    <h2>${esc(e.name)}</h2>
+    <span class="vs">${esc(e.sub)}</span>
+    <span class="when">${esc(longDate(e))}${e.time ? " · " + esc(e.time) : ""}${e.venue ? " · " + esc(e.venue) : ""}</span>
+    <span class="row">
+      <span class="days">${s === "live" ? `<b>Today</b>` : `<b>${n}</b><span>${n === 1 ? "day to go" : "days to go"}</span>`}</span>
+      ${e.url ? `<span class="open">${s === "live" ? "Live scores" : "Open"} →</span>` : ""}
+    </span>
+  </${tag}>`;
+}
+
+function tile(e) {
+  const s = status(e);
+  const chip = { upcoming: "Upcoming", live: "On today", results: "Result", tba: "Date TBA" }[s];
+  const when = shortDate(e);
+  const foot = s === "results" && e.result ? `<span class="res">${esc(e.result)}</span>`
+    : e.url ? `<span class="go">${s === "results" ? "Results" : "Open"} →</span>`
+    : `<span class="soon">Coming soon</span>`;
+  const logos = crests(e);
+  const showChip = !logos || s !== "upcoming";
+  const inner = `<span class="top">${logos}${showChip ? `<span class="chip${s === "live" ? " live" : ""}">${chip}</span>` : ""}</span>
+    <span><h3>${esc(e.short || e.name)}</h3><span class="s">${esc(e.sub)}${when ? "<br>" + esc(when) : ""}</span></span>
+    ${foot}`;
+  return e.url ? `<a class="tile${s === "results" ? " dark" : ""}" href="${esc(e.url)}">${inner}</a>`
+               : `<div class="tile">${inner}</div>`;
+}
+
+function render() {
+  const up = EVENTS.filter(e => status(e) !== "results")
+    .sort((a, b) => (parse(a.date) ?? Infinity) - (parse(b.date) ?? Infinity));
+  const past = EVENTS.filter(e => status(e) === "results")
+    .sort((a, b) => (parse(b.date) ?? 0) - (parse(a.date) ?? 0));
+  const next = up.find(e => ["live", "upcoming"].includes(status(e)));
+  const rest = [...up.filter(e => e !== next), ...past];
+  document.getElementById("app").innerHTML = `
+    ${next ? hero(next) : ""}
+    ${rest.length ? `<div class="label">${next ? "More events" : "Events"}</div>
+    <div class="grid">${rest.map(tile).join("")}${rest.length % 2 ? `<div class="tile more">More events<br>announced soon</div>` : ""}</div>` : ""}`;
+  document.getElementById("app").style.cssText = "display:grid;gap:16px";
+}
+render();
+
+/* ===== Install as an app ===== */
+(function installTip() {
+  const box = document.getElementById("install");
+  const standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
+  if (standalone) return;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  let deferred = null;
+  window.addEventListener("beforeinstallprompt", ev => {
+    ev.preventDefault(); deferred = ev;
+    box.innerHTML = `<strong>Get the app</strong><div>Add ATP Events to your home screen.</div><button type="button" id="install-btn">Install</button>`;
+    box.hidden = false;
+    document.getElementById("install-btn").addEventListener("click", async () => {
+      deferred.prompt(); await deferred.userChoice; deferred = null; box.hidden = true;
+    });
+  });
+  if (isIOS) {
+    box.innerHTML = `<strong>Get the app</strong><div>Tap the <b>Share</b> button in Safari, then <b>Add to Home Screen</b>.</div>`;
+    box.hidden = false;
+  }
+})();
+
+if ("serviceWorker" in navigator && location.protocol === "https:" && /atppickleballclub|github\.io/.test(location.hostname)) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+</script>
+</body>
+</html>
