@@ -2,8 +2,8 @@
 // Network-first: people always get the latest events list when online,
 // and the last copy they saw if they're offline at the courts.
 // Bump VERSION if you ever need to force-clear the cache.
-const VERSION = "atp-events-v8";
-const CORE = ["./", "index.html", "manifest.json", "icons/icon-192.png", "icons/icon-512.png", "icons/logo.png", "icons/dural.png", "icons/ps.png"];
+const VERSION = "atp-events-v10";
+const CORE = ["./", "index.html", "manifest.json", "icons/icon-192.png", "icons/icon-512.png", "icons/logo.png", "icons/dural.png", "icons/ps.png", "icons/dupr-blue.png", "icons/dupr-white.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(VERSION).then((c) => c.addAll(CORE)).then(() => self.skipWaiting()));

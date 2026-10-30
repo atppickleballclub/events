@@ -92,6 +92,18 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .clubs { display: inline-flex; align-items: center; gap: 6px; flex: none; }
 .clubs .x { font-family: var(--display); font-weight: 700; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; opacity: .7; }
 .crest { width: 34px; height: 34px; object-fit: contain; display: block; }
+.clubs .crest.wide { width: auto; height: 30px; display: flex; align-items: center; flex: none; }
+.clubs .crest.wide img { height: 100%; width: auto; max-width: none; flex: none; display: block; }
+.crest.wide .dk { display: none; }
+.hero .clubs .crest.wide { width: auto; height: 40px; }
+.tile .clubs .crest.wide { width: auto; height: 32px; }
+.clubs .bar { width: 2px; align-self: stretch; margin: 6px 6px; background: var(--rule); border-radius: 2px; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .crest.wide .lt { display: none; }
+  :root:not([data-theme="light"]) .crest.wide .dk { display: block; }
+}
+:root[data-theme="dark"] .crest.wide .lt { display: none; }
+:root[data-theme="dark"] .crest.wide .dk { display: block; }
 .crest.token { border-radius: 50%; display: block; padding: 5px; box-shadow: 0 0 0 2px var(--rim); }
 .crest.token img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .hero .crest.token { padding: 8px; box-shadow: 0 0 0 3px var(--ball-ink); }
@@ -156,7 +168,7 @@ const EVENTS = [
   },
   {
     name: "DUPR Rating Sessions",
-    clubs: ["atp"],
+    clubs: ["atp", "dupr"],
     date: null,
     url: null
   },
@@ -174,7 +186,9 @@ const EVENTS = [
 const CLUBS = {
   atp:   { name: "ATP Pickleball Club",           initials: "ATP", logo: "icons/logo.png" },
   dural: { name: "The Centre Dural Pickleball Club", initials: "DPC", logo: "icons/dural.png", bg: "#ffffff" },
-  ps:    { name: "Port Stephens Pickleball Club", initials: "PS",  logo: "icons/ps.png",    bg: "#0b344b" }
+  ps:    { name: "Port Stephens Pickleball Club", initials: "PS",  logo: "icons/ps.png",    bg: "#0b344b" },
+  // Wide logos (wordmarks). logoDark = the version shown when the phone is in dark mode.
+  dupr:  { name: "DUPR", logo: "icons/dupr-blue.png", logoDark: "icons/dupr-white.png", wide: true }
 };
 /* ================================= */
 
@@ -190,11 +204,14 @@ const shortDate = e => { const d = parse(e.date); return d ? `${d.getDate()} ${M
 function crests(e) {
   const list = (e.clubs || []).map(k => CLUBS[k]).filter(Boolean);
   if (!list.length) return "";
-  const one = c => c.logo && c.bg
+  const one = c => c.wide
+    ? `<span class="crest wide" role="img" aria-label="${esc(c.name)}"><img class="lt" src="${esc(c.logo)}" alt="">${c.logoDark ? `<img class="dk" src="${esc(c.logoDark)}" alt="">` : ""}</span>`
+    : c.logo && c.bg
     ? `<span class="crest token" style="background:${esc(c.bg)}"><img src="${esc(c.logo)}" alt="${esc(c.name)}"></span>`
     : c.logo ? `<img class="crest" src="${esc(c.logo)}" alt="${esc(c.name)}">`
     : `<span class="crest init" role="img" aria-label="${esc(c.name)}">${esc(c.initials)}</span>`;
-  return `<span class="clubs">${list.map(one).join('<span class="x" aria-hidden="true">vs</span>')}</span>`;
+  const sep = list.some(c => c.wide) ? '<span class="bar" aria-hidden="true"></span>' : '<span class="x" aria-hidden="true">vs</span>';
+  return `<span class="clubs">${list.map(one).join(sep)}</span>`;
 }
 
 function hero(e) {
