@@ -156,7 +156,6 @@ const EVENTS = [
   },
   {
     name: "DUPR Rating Sessions",
-    sub: "ATP club event",
     clubs: ["atp"],
     date: null,
     url: null
@@ -224,7 +223,7 @@ function tile(e) {
   const logos = crests(e);
   const showChip = !logos || s !== "upcoming";
   const inner = `<span class="top">${logos}${showChip ? `<span class="chip${s === "live" ? " live" : ""}">${chip}</span>` : ""}</span>
-    <span><h3>${esc(e.short || e.name)}</h3><span class="s">${esc(e.sub)}${when ? "<br>" + esc(when) : ""}</span></span>
+    <span><h3>${esc(e.short || e.name)}</h3>${e.sub || when ? `<span class="s">${esc(e.sub)}${e.sub && when ? "<br>" : ""}${esc(when)}</span>` : ""}</span>
     ${foot}`;
   return e.url ? `<a class="tile${s === "results" ? " dark" : ""}" href="${esc(e.url)}">${inner}</a>`
                : `<div class="tile">${inner}</div>`;
