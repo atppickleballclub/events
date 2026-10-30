@@ -86,7 +86,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .tile .res { font-family: var(--display); font-weight: 700; font-size: 16px; color: var(--ball); letter-spacing: .04em; text-transform: uppercase; }
 .tile .go { align-self: stretch; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; border-radius: 999px; background: var(--court-deep); color: var(--ball); font-family: var(--display); font-weight: 700; font-size: 19px; letter-spacing: .06em; text-transform: uppercase; }
 .tile.dark .go { background: var(--ball); color: var(--ball-ink); }
-.tile .soon { font-size: 15px; color: var(--muted); font-style: italic; }
+.tile .soon { align-self: stretch; display: flex; align-items: center; justify-content: center; min-height: 52px; border-radius: 999px; border: 2px dashed var(--rule); color: var(--muted); font-family: var(--display); font-weight: 700; font-size: 19px; letter-spacing: .06em; text-transform: uppercase; }
 .tile.more { border-style: dashed; background: transparent; color: var(--muted); justify-content: center; align-items: center; text-align: center; font-size: 15px; min-height: 64px; }
 /* Club logos ("ATP vs Dural") */
 .clubs { display: inline-flex; align-items: center; gap: 6px; flex: none; }
@@ -155,6 +155,13 @@ const EVENTS = [
     url: "https://atpvsps.atppickleballclub.com.au"
   },
   {
+    name: "DUPR Rating Sessions",
+    sub: "ATP club event",
+    clubs: ["atp"],
+    date: null,
+    url: null
+  },
+  {
     name: "Interclub Challenge",
     sub: "ATP vs Dural",
     clubs: ["atp", "dural"],
@@ -209,11 +216,11 @@ function hero(e) {
 
 function tile(e) {
   const s = status(e);
-  const chip = { upcoming: "Upcoming", live: "On today", results: "Result", tba: "Date TBA" }[s];
+  const chip = { upcoming: "Upcoming", live: "On today", results: "Result", tba: "Coming soon" }[s];
   const when = shortDate(e);
   const foot = s === "results" && e.result ? `<span class="res">${esc(e.result)}</span>`
     : e.url ? `<span class="go">${s === "results" ? "Results" : "Open"} →</span>`
-    : `<span class="soon">Coming soon</span>`;
+    : `<span class="soon">Dates to be announced</span>`;
   const logos = crests(e);
   const showChip = !logos || s !== "upcoming";
   const inner = `<span class="top">${logos}${showChip ? `<span class="chip${s === "live" ? " live" : ""}">${chip}</span>` : ""}</span>
@@ -260,7 +267,25 @@ render();
 })();
 
 if ("serviceWorker" in navigator && location.protocol === "https:" && /atppickleballclub|github\.io/.test(location.hostname)) {
-  navigator.serviceWorker.register("sw.js").catch(() => {});
+  // Keep installed copies up to date:
+  //  - check for a new version every time the app is opened or brought back
+  //  - if it's been in the background for 30+ minutes, reload it fresh
+  //  - when a new version installs, reload once so it shows straight away
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!hadController || reloaded) return;
+    reloaded = true;
+    location.reload();
+  });
+  navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then((reg) => {
+    let hiddenAt = 0;
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) { hiddenAt = Date.now(); return; }
+      reg.update().catch(() => {});
+      if (hiddenAt && Date.now() - hiddenAt > 30 * 60 * 1000) location.reload();
+    });
+  }).catch(() => {});
 }
 </script>
 </body>

@@ -2,7 +2,7 @@
 // Network-first: people always get the latest events list when online,
 // and the last copy they saw if they're offline at the courts.
 // Bump VERSION if you ever need to force-clear the cache.
-const VERSION = "atp-events-v5";
+const VERSION = "atp-events-v7";
 const CORE = ["./", "index.html", "manifest.json", "icons/icon-192.png", "icons/icon-512.png", "icons/logo.png", "icons/dural.png", "icons/ps.png"];
 
 self.addEventListener("install", (e) => {
@@ -22,7 +22,9 @@ self.addEventListener("fetch", (e) => {
   // Only handle our own pages/files; links out to event sites go straight through.
   if (req.method !== "GET" || new URL(req.url).origin !== location.origin) return;
   e.respondWith(
-    fetch(req)
+    // "no-cache" = always ask GitHub for the latest file (it only sends it
+    // again if it changed), so new logos and events show up straight away.
+    fetch(req.url, { cache: "no-cache", credentials: "same-origin" })
       .then((res) => {
         const copy = res.clone();
         caches.open(VERSION).then((c) => c.put(req, copy));
