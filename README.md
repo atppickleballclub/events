@@ -1,6 +1,6 @@
 # ATP Events
 
-The club's events hub at **events.atppickleballclub.com.au**. One card per event, each linking to that event's own site. Installs to a phone home screen as an app.
+The club's events hub at **eventsapp.atppickleballclub.com.au**. One card per event, each linking to that event's own site. Installs to a phone home screen as an app.
 
 ## Adding or changing an event
 
