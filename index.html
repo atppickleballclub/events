@@ -76,18 +76,18 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
 /* Tiles */
 .label { margin: 8px 2px 0; font-family: var(--display); font-weight: 700; font-size: 13px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
-.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-@media (min-width: 560px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-.tile { background: var(--surface); border: 1px solid var(--rule); border-radius: 18px; padding: 14px; aspect-ratio: 1 / 1; max-width: 100%; min-width: 0;
-  display: flex; flex-direction: column; justify-content: space-between; gap: 6px; text-decoration: none; color: var(--fg); }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+@media (min-width: 600px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.tile { background: var(--surface); border: 1px solid var(--rule); border-radius: 18px; padding: 18px; max-width: 100%; min-width: 0;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 12px; text-decoration: none; color: var(--fg); }
 .tile.dark { background: var(--court-deep); color: var(--line); border-color: transparent; }
-.tile h3 { margin: 0; font-family: var(--display); font-weight: 800; font-size: 22px; line-height: 1; text-transform: uppercase; overflow-wrap: anywhere; }
-.tile .s { font-size: 13px; opacity: .8; }
+.tile h3 { margin: 0; font-family: var(--display); font-weight: 800; font-size: 28px; line-height: 1; text-transform: uppercase; overflow-wrap: anywhere; }
+.tile .s { font-size: 15px; opacity: .85; }
 .tile .res { font-family: var(--display); font-weight: 700; font-size: 16px; color: var(--ball); letter-spacing: .04em; text-transform: uppercase; }
-.tile .go { font-family: var(--display); font-weight: 700; font-size: 15px; letter-spacing: .06em; text-transform: uppercase; color: var(--court); }
-.tile.dark .go { color: var(--ball); }
-.tile .soon { font-size: 13px; color: var(--muted); font-style: italic; }
-.tile.more { border-style: dashed; background: transparent; color: var(--muted); justify-content: center; align-items: center; text-align: center; font-size: 14px; }
+.tile .go { align-self: stretch; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; border-radius: 999px; background: var(--court-deep); color: var(--ball); font-family: var(--display); font-weight: 700; font-size: 19px; letter-spacing: .06em; text-transform: uppercase; }
+.tile.dark .go { background: var(--ball); color: var(--ball-ink); }
+.tile .soon { font-size: 15px; color: var(--muted); font-style: italic; }
+.tile.more { border-style: dashed; background: transparent; color: var(--muted); justify-content: center; align-items: center; text-align: center; font-size: 15px; min-height: 64px; }
 /* Club logos ("ATP vs Dural") */
 .clubs { display: inline-flex; align-items: center; gap: 6px; flex: none; }
 .clubs .x { font-family: var(--display); font-weight: 700; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; opacity: .7; }
@@ -99,8 +99,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   display: grid; place-items: center; font-family: var(--display); font-weight: 800; font-size: 13px; letter-spacing: .02em; }
 .hero .crest { width: 56px; height: 56px; }
 .hero .crest.init { font-size: 19px; border-width: 3px; }
-.tile .crest { width: 40px; height: 40px; }
-.tile .crest.init { font-size: 11px; }
+.tile .crest { width: 48px; height: 48px; }
+.tile .crest.init { font-size: 14px; }
 .tile .crest.init { background: var(--bg); color: var(--fg); }
 .tile.dark .crest.init { background: var(--court); color: var(--line); }
 .tile .top { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; flex-wrap: wrap; }
@@ -233,7 +233,7 @@ function render() {
   document.getElementById("app").innerHTML = `
     ${next ? hero(next) : ""}
     ${rest.length ? `<div class="label">${next ? "More events" : "Events"}</div>
-    <div class="grid">${rest.map(tile).join("")}${rest.length % 2 ? `<div class="tile more">More events<br>announced soon</div>` : ""}</div>` : ""}`;
+    <div class="grid">${rest.map(tile).join("")}<div class="tile more">More events announced soon</div></div>` : ""}`;
   document.getElementById("app").style.cssText = "display:grid;gap:16px";
 }
 render();
