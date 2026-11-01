@@ -2,7 +2,7 @@
 // Network-first: people always get the latest events list when online,
 // and the last copy they saw if they're offline at the courts.
 // Bump VERSION if you ever need to force-clear the cache.
-const VERSION = "atp-events-v10";
+const VERSION = "atp-events-v11";
 const CORE = ["./", "index.html", "manifest.json", "icons/icon-192.png", "icons/icon-512.png", "icons/logo.png", "icons/dural.png", "icons/ps.png", "icons/dupr-blue.png", "icons/dupr-white.png"];
 
 self.addEventListener("install", (e) => {

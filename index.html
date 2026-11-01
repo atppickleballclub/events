@@ -303,6 +303,40 @@ if ("serviceWorker" in navigator && location.protocol === "https:" && /atppickle
     });
   }).catch(() => {});
 }
+/* ===== Usage counter =====
+   Once a day per phone, saves an anonymous note to the ATP Events Firebase:
+   a random ID for this phone, the date, iPhone/Android, and whether it was
+   opened from the home screen. No names or personal details.            */
+(function countVisit() {
+  if (location.protocol !== "https:" || !/atppickleballclub|github\.io/.test(location.hostname)) return;
+  const FB_KEY = "AIzaSyAykyvBpr-3H4_gCm--8tDN2IhV-2EFfj0";
+  const FB_PROJECT = "atp-events";
+  const send = () => {
+    let id, last;
+    try {
+      id = localStorage.getItem("atpDevice");
+      if (!id) { id = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(36).slice(2)).slice(0, 36); localStorage.setItem("atpDevice", id); }
+      last = localStorage.getItem("atpLastCount");
+    } catch (e) { return; }
+    const installed = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+    const ua = navigator.userAgent;
+    const platform = /iphone|ipad|ipod/i.test(ua) || (/macintosh/i.test(ua) && navigator.maxTouchPoints > 1) ? "ios" : /android/i.test(ua) ? "android" : "other";
+    const date = new Date().toLocaleDateString("en-CA", { timeZone: "Australia/Sydney" });
+    const stamp = date + (installed ? "-app" : "-web");
+    if (last === stamp) return;
+    const docId = date + "_" + id + (installed ? "_app" : "_web");
+    fetch(`https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/appVisits?documentId=${encodeURIComponent(docId)}&key=${FB_KEY}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fields: {
+        date: { stringValue: date }, device: { stringValue: id },
+        installed: { booleanValue: installed }, platform: { stringValue: platform }
+      } })
+    }).then(r => { if (r.ok || r.status === 409) { try { localStorage.setItem("atpLastCount", stamp); } catch (e) {} } }).catch(() => {});
+  };
+  send();
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) send(); });
+})();
 </script>
 </body>
 </html>

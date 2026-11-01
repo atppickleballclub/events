@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0b344b">
+<title>ATP Events Stats</title>
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: one column. Sign-in card, then headline numbers, a 14-day bar chart and a platform split. */
+:root {
+  --court: #1a78a8; --court-deep: #0b344b; --ball: #d7db38; --rim: #aec11d;
+  --bg: #eef3f4; --surface: #ffffff; --fg: #0b2433; --muted: #557080; --rule: #d3e0e4; --bad: #b3261e;
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --court: #4cb6e6; --court-deep: #0e3a53; --bg: #071d2a; --surface: #0f2c3f; --fg: #e6f0f3; --muted: #93abb8; --rule: #1f4257; --bad: #ff8a80; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 16px; line-height: 1.45; }
+.wrap { max-width: 640px; margin: 0 auto; padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 16px; }
+header { display: flex; align-items: center; gap: 14px; }
+header img { width: 54px; height: auto; }
+header small { display: block; font-family: var(--display); font-weight: 600; font-size: 13px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 0; font-family: var(--display); font-weight: 800; font-size: 30px; line-height: 1; text-transform: uppercase; }
+.card { background: var(--surface); border: 1px solid var(--rule); border-radius: 16px; padding: 18px; display: grid; gap: 12px; }
+label { font-weight: 600; font-size: 15px; display: grid; gap: 4px; }
+input { font: inherit; padding: 10px 12px; min-height: 44px; border-radius: 10px; border: 1px solid var(--rule); background: var(--bg); color: var(--fg); }
+button { min-height: 48px; border: 0; border-radius: 999px; background: var(--court-deep); color: var(--ball); font: 700 18px var(--display); letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+button.ghost { background: transparent; color: var(--court); min-height: 40px; font-size: 15px; justify-self: start; padding: 0; }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--court); outline-offset: 2px; }
+.err { color: var(--bad); font-size: 15px; margin: 0; }
+.big { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.stat { background: var(--surface); border: 1px solid var(--rule); border-radius: 16px; padding: 16px; display: grid; gap: 2px; }
+.stat.main { grid-column: 1 / -1; background: var(--ball); color: var(--court-deep); border-color: transparent; }
+.stat b { font-family: var(--display); font-weight: 800; font-size: 48px; line-height: 1; font-variant-numeric: tabular-nums; }
+.stat.main b { font-size: 72px; }
+.stat span { font-size: 15px; font-weight: 600; }
+.stat small { font-size: 13px; color: var(--muted); }
+.stat.main small { color: var(--court-deep); opacity: .8; }
+h2 { margin: 0; font-family: var(--display); font-weight: 700; font-size: 14px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.chart { display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: 4px; align-items: end; height: 140px; }
+.bar { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; gap: 4px; min-width: 0; }
+.bar i { display: block; width: 100%; background: var(--court); border-radius: 4px 4px 0 0; min-height: 2px; }
+.bar em { font-style: normal; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.bar.today i { background: var(--rim); }
+.days { display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: 4px; font-size: 11px; color: var(--muted); text-align: center; }
+.split { display: grid; gap: 8px; }
+.row { display: grid; grid-template-columns: 90px 1fr 40px; gap: 10px; align-items: center; font-size: 15px; }
+.track { height: 12px; background: var(--bg); border-radius: 999px; overflow: hidden; }
+.track i { display: block; height: 100%; background: var(--court); border-radius: 999px; }
+.row b { text-align: right; font-variant-numeric: tabular-nums; }
+.note { color: var(--muted); font-size: 14px; margin: 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="icons/logo.png" alt="ATP Pickleball Club">
+    <div><small>ATP Events app</small><h1>Usage stats</h1></div>
+  </header>
+
+  <form class="card" id="login" hidden>
+    <label for="email">Committee email<input id="email" type="email" autocomplete="username" required></label>
+    <label for="pw">Password<input id="pw" type="password" autocomplete="current-password" required></label>
+    <button type="submit" id="go">Sign in</button>
+    <p class="err" id="err" hidden></p>
+  </form>
+
+  <div id="stats" hidden style="display:grid;gap:16px">
+    <div class="big">
+      <div class="stat main"><b id="s-installed">–</b><span>Phones with the app installed</span><small>Opened from the home screen at least once</small></div>
+      <div class="stat"><b id="s-week">–</b><span>Active this week</span><small>Opened in the last 7 days</small></div>
+      <div class="stat"><b id="s-today">–</b><span>Today</span><small>Phones that opened it today</small></div>
+      <div class="stat"><b id="s-web">–</b><span>Browser only</span><small>Looked at the page, never installed</small></div>
+      <div class="stat"><b id="s-new">–</b><span>New installs</span><small>First home-screen open, last 7 days</small></div>
+    </div>
+    <div class="card">
+      <h2>Phones per day, last 14 days</h2>
+      <div class="chart" id="chart"></div>
+      <div class="days" id="days"></div>
+    </div>
+    <div class="card">
+      <h2>Installed by phone type</h2>
+      <div class="split" id="split"></div>
+    </div>
+    <p class="note" id="updated"></p>
+    <button type="button" class="ghost" id="out">Sign out</button>
+  </div>
+</div>
+
+<script>
+const FB_KEY = "AIzaSyAykyvBpr-3H4_gCm--8tDN2IhV-2EFfj0";
+const FB_PROJECT = "atp-events";
+const $ = id => document.getElementById(id);
+const store = { get(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } },
+                set(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} },
+                del(k) { try { sessionStorage.removeItem(k); } catch (e) {} } };
+
+function showLogin(msg) {
+  $("stats").hidden = true; $("login").hidden = false;
+  $("err").hidden = !msg; $("err").textContent = msg || "";
+}
+
+$("login").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  $("go").disabled = true; $("go").textContent = "Signing in…";
+  try {
+    const r = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FB_KEY}`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: $("email").value.trim(), password: $("pw").value, returnSecureToken: true })
+    });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error && j.error.message);
+    store.set("atpToken", j.idToken);
+    store.set("atpTokenExp", String(Date.now() + (Number(j.expiresIn) - 60) * 1000));
+    load();
+  } catch (e) {
+    showLogin("That email and password didn't work. Use your committee login for the ATP Events Firebase.");
+  } finally {
+    $("go").disabled = false; $("go").textContent = "Sign in";
+  }
+});
+$("out").addEventListener("click", () => { store.del("atpToken"); showLogin(); });
+
+async function fetchAll(token) {
+  const out = []; let page = "";
+  do {
+    const r = await fetch(`https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/appVisits?pageSize=1000${page ? "&pageToken=" + encodeURIComponent(page) : ""}`,
+      { headers: { Authorization: "Bearer " + token } });
+    if (r.status === 401 || r.status === 403) throw new Error("auth");
+    const j = await r.json();
+    (j.documents || []).forEach(d => {
+      const f = d.fields || {};
+      out.push({ date: f.date?.stringValue, device: f.device?.stringValue, installed: !!f.installed?.booleanValue, platform: f.platform?.stringValue || "other" });
+    });
+    page = j.nextPageToken || "";
+  } while (page);
+  return out;
+}
+
+const sydDate = d => d.toLocaleDateString("en-CA", { timeZone: "Australia/Sydney" });
+
+async function load() {
+  const token = store.get("atpToken");
+  if (!token || Number(store.get("atpTokenExp") || 0) < Date.now()) return showLogin();
+  let rows;
+  try { rows = await fetchAll(token); }
+  catch (e) { return showLogin(e.message === "auth" ? "Your sign-in has expired. Sign in again." : "Couldn't load the numbers. Check your connection and try again."); }
+
+  const today = sydDate(new Date());
+  const days = [...Array(14)].map((_, i) => sydDate(new Date(Date.now() - (13 - i) * 86400000)));
+  const weekStart = days[7];
+
+  const installed = new Map();          // device -> {platform, first}
+  const anyDevice = new Set(), appDevice = new Set();
+  rows.forEach(r => {
+    if (!r.date || !r.device) return;
+    anyDevice.add(r.device);
+    if (r.installed) {
+      appDevice.add(r.device);
+      const cur = installed.get(r.device);
+      if (!cur || r.date < cur.first) installed.set(r.device, { platform: r.platform, first: r.date });
+    }
+  });
+  const distinct = (pred) => new Set(rows.filter(pred).map(r => r.device)).size;
+
+  $("s-installed").textContent = installed.size;
+  $("s-week").textContent = distinct(r => r.date >= weekStart);
+  $("s-today").textContent = distinct(r => r.date === today);
+  $("s-web").textContent = [...anyDevice].filter(d => !appDevice.has(d)).length;
+  $("s-new").textContent = [...installed.values()].filter(v => v.first >= weekStart).length;
+
+  const perDay = days.map(d => distinct(r => r.date === d));
+  const max = Math.max(1, ...perDay);
+  $("chart").innerHTML = perDay.map((n, i) =>
+    `<div class="bar${days[i] === today ? " today" : ""}" title="${days[i]}: ${n}"><em>${n || ""}</em><i style="height:${(n / max) * 100}%"></i></div>`).join("");
+  $("days").innerHTML = days.map(d => `<span>${Number(d.slice(8))}</span>`).join("");
+
+  const counts = { ios: 0, android: 0, other: 0 };
+  installed.forEach(v => { counts[v.platform] = (counts[v.platform] || 0) + 1; });
+  const total = Math.max(1, installed.size);
+  $("split").innerHTML = [["iPhone", counts.ios], ["Android", counts.android], ["Other", counts.other]]
+    .map(([name, n]) => `<div class="row"><span>${name}</span><span class="track"><i style="width:${(n / total) * 100}%"></i></span><b>${n}</b></div>`).join("");
+
+  $("updated").textContent = `Updated ${new Date().toLocaleString("en-AU", { timeZone: "Australia/Sydney", dateStyle: "medium", timeStyle: "short" })}. Counts start from when the counter was added.`;
+  $("login").hidden = true; $("stats").hidden = false;
+}
+
+load();
+</script>
+</body>
+</html>
